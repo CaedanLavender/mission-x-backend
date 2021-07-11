@@ -1,21 +1,21 @@
 // Imports/require
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const mysql = require('mysql2');
+const express		= require('express');
+const app			= express();
+const cors			= require('cors');
+const mysql			= require('mysql2');
 require('dotenv').config();
 
 // Declaring local variables with .env details
-const db_host = process.env.DB_HOST
-const db_user = process.env.DB_USER
+const db_host		= process.env.DB_HOST
+const db_user		= process.env.DB_USER
 const db_password = process.env.DB_PASSWORD
 
 // Creates sql connection using details from .env file
 const db = mysql.createConnection({
-	host		:	db_host,
-	user		:	db_user,
-	password	:	db_password,
-	database	:	'mission_x'
+	host		: db_host,
+	user		: db_user,
+	password	: db_password,
+	database	: 'mission_x'
 })
 
 // Sets up app to accept json
@@ -28,11 +28,9 @@ db.connect(err => console.log(err || "Connection Successful"));
 
 // Project endpoint
 app.get('/projects', (req, res) => {
-	console.log('hit')
 	// console.log(req);
-	db.query('SELECT * FROM users', (err, results) => {
+	db.query('SELECT * FROM project', (err, results) => {
 		if (results.length) {
-			console.log(results);
 			res.status(200).send(results);
 		} else {
 			res.status(400).send("There was an error")
