@@ -26,7 +26,7 @@ app.use(cors());
 // Logs if connection is successful
 db.connect(err => console.log(err || "Connection Successful"));
 
-// Project endpoint
+// Project list endpoint
 app.get('/projects', (req, res) => {
 	// console.log(req);
 	db.query('SELECT * FROM project', (err, results) => {
@@ -37,6 +37,18 @@ app.get('/projects', (req, res) => {
 		}
 	})
 });
+
+// Endpoint for a specific project
+app.get('/project', (req, res) => {
+	console.log(req)
+	db.query('SELECT * FROM project where project_number = ?', [req.body.project], (err, results) => {
+		if (results.length) {
+			res.status(200).send(results);
+		} else {
+			res.status(400).send("The requested project does not exist")
+		}
+	})
+})
 
 // Add your endpoints below
 // i.e:
