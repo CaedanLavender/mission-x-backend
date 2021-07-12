@@ -39,7 +39,6 @@ app.get('/projects', (req, res) => {
 
 // Endpoint for a specific project
 app.get('/project', (req, res) => {
-	console.log(req.query.project)
 	db.query('SELECT * FROM project where project_number = ?', [req.query.project], (err, results) => {
 		if (results.length) {
 			res.status(200).send(results);
