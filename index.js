@@ -48,13 +48,15 @@ app.get('/project', (req, res) => {
 	})
 })
 
-// Simple endpoint to return the number of projects
+// Simple endpoint to return the number of rows in a given table
 app.get('/count', (req, res) => {
-	db.query('SELECT COUNT(*) FROM project', (err, results) => {
-		if (results.length) {
-			res.send(results[0])
+	db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
+		if (err) {
+			res.status(400).send(err.code==="ER_NO_SUCH_TABLE"?"The table does not exist":"Unknown error")
+		} else if (results.length) {
+			res.status(200).send({'count': results[0][Object.keys(results[0])[0]]})
 		} else {
-			res.send("There was an error requesting the number of projects")
+			res.status(400).send("There was an error requesting the number of rows")
 		}
 	})
 })
