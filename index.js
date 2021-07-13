@@ -48,6 +48,17 @@ app.get('/project', (req, res) => {
 	})
 })
 
+// Simple endpoint to return the number of projects
+app.get('/count', (req, res) => {
+	db.query('SELECT COUNT(*) FROM project', (err, results) => {
+		if (results.length) {
+			res.send(results[0])
+		} else {
+			res.send("There was an error requesting the number of projects")
+		}
+	})
+})
+
 
 // Add your endpoints below
 // i.e:
