@@ -26,14 +26,47 @@ app.use(cors());
 // Logs if connection is successful
 db.connect((err) => console.log(err || "Connection Successful"));
 
-// Project endpoint
+// Project list endpoint
 app.get("/projects", (req, res) => {
-  // console.log(req);
   db.query("SELECT * FROM project", (err, results) => {
     if (results.length) {
       res.status(200).send(results);
     } else {
       res.status(400).send("There was an error");
+    }
+  });
+});
+
+// Endpoint for a specific project
+app.get("/project", (req, res) => {
+  db.query(
+    "SELECT * FROM project where project_id = ?",
+    [req.query.project],
+    (err, results) => {
+      if (results.length) {
+        res.status(200).send(results);
+      } else {
+        res.status(400).send("The requested project does not exist");
+      }
+    }
+  );
+});
+
+// Simple endpoint to return the number of rows in a given table
+app.get("/count", (req, res) => {
+  db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
+    if (err) {
+      res
+        .status(400)
+        .send(
+          err.code === "ER_NO_SUCH_TABLE"
+            ? "The table does not exist"
+            : "Unknown error"
+        );
+    } else if (results.length) {
+      res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
+    } else {
+      res.status(400).send("There was an error requesting the number of rows");
     }
   });
 });
