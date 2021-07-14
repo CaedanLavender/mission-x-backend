@@ -12,10 +12,10 @@ const db_password = process.env.DB_PASSWORD;
 
 // Creates sql connection using details from .env file
 const db = mysql.createConnection({
-  host: db_host,
-  user: db_user,
-  password: db_password,
-  database: "mission_x",
+	host		: db_host,
+	user		: db_user,
+	password	: db_password,
+	database	: "mission_x",
 });
 
 // Sets up app to accept json
@@ -28,66 +28,64 @@ db.connect((err) => console.log(err || "Connection Successful"));
 
 // Project list endpoint
 app.get("/projects", (req, res) => {
-  db.query("SELECT * FROM project", (err, results) => {
-    if (results.length) {
-      res.status(200).send(results);
-    } else {
-      res.status(400).send("There was an error");
-    }
-  });
+	db.query("SELECT * FROM project", (err, results) => {
+		if (results.length) {
+			res.status(200).send(results);
+		} else {
+			res.status(400).send("There was an error");
+		}
+	});
 });
 
 // Endpoint for a specific project
 app.get("/project", (req, res) => {
-  db.query(
-    "SELECT * FROM project where project_id = ?",
-    [req.query.project],
-    (err, results) => {
-      if (results.length) {
-        res.status(200).send(results);
-      } else {
-        res.status(400).send("The requested project does not exist");
-      }
-    }
-  );
+	db.query("SELECT * FROM project where project_id = ?", [req.query.project], (err, results) => {
+		if (results.length) {
+			res.status(200).send(results);
+		} else {
+			res.status(400).send("The requested project does not exist");
+		}
+	}
+	);
 });
 
 // Simple endpoint to return the number of rows in a given table
 app.get("/count", (req, res) => {
-  db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
-    if (err) {
-      res
-        .status(400)
-        .send(
-          err.code === "ER_NO_SUCH_TABLE"
-            ? "The table does not exist"
-            : "Unknown error"
-        );
-    } else if (results.length) {
-      res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
-    } else {
-      res.status(400).send("There was an error requesting the number of rows");
-    }
-  });
+	db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
+		if (err) {
+			res.status(400).send(err.code === "ER_NO_SUCH_TABLE" ? "The table does not exist" : "Unknown error");
+		} else if (results.length) {
+			res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
+		} else {
+			res.status(400).send("There was an error requesting the number of rows");
+		}
+	});
 });
+
+app.get("/projectindex", (req, res) => {
+	console.log(req.query);
+	db.query(`WITH PROJECT AS ( SELECT project_number, row_number() OVER ( ORDER BY project_number) AS 'RowNumber' FROM project ) SELECT RowNumber FROM project WHERE project_number = ?`, [req.query.project], (err, results) => {
+		res.status(200).send(results)
+	})
+})
 
 // Add your endpoints below
 // i.e:
 // app.get('/something', (req, res) => blah blah blah
 
 app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
-    res.send(result);
-  });
+	db.query("SELECT * FROM users", (err, result) => {
+		res.send(result);
+	});
 });
 
 app.get("/userslogged", (req, res) => {
-  db.query(
-    "SELECT * FROM users JOIN progress_history ON users.user_id = users.user_id WHERE users.user_id = '15'",
-    (err, result) => {
-      res.send(result);
-    }
-  );
+	db.query(
+		"SELECT * FROM users JOIN progress_history ON users.user_id = users.user_id WHERE users.user_id = '15'",
+		(err, result) => {
+			res.send(result);
+		}
+	);
 });
 
 // The backend can now be queried at localhost:4000
