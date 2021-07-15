@@ -63,9 +63,9 @@ app.get("/count", (req, res) => {
 });
 
 app.get("/projectindex", (req, res) => {
-	console.log(req.query);
-	db.query(`WITH PROJECT AS ( SELECT project_number, row_number() OVER ( ORDER BY project_number) AS 'RowNumber' FROM project ) SELECT RowNumber FROM project WHERE project_number = ?`, [req.query.project], (err, results) => {
-		res.status(200).send(results)
+	db.query(`WITH project AS ( SELECT project_id, project_number, row_number() OVER ( ORDER BY project_number) AS 'rownumber' FROM project ) SELECT project_id, rownumber FROM project WHERE project_id = ?`, [req.query.project], (err, results) => {
+		console.log(results)
+		res.send({index: results[0].rownumber})
 	})
 })
 
