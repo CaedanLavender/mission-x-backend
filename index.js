@@ -87,9 +87,12 @@ app.get("/projectindex", (req, res) => {
 // app.get('/something', (req, res) => blah blah blah
 
 app.get("/users", (req, res) => {
-  db.query("SELECT * FROM users", (err, result) => {
-    res.send(result);
-  });
+  db.query(
+    "SELECT first_name, last_name, school, date_of_birth, profile_pic, contact_number, email, course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON project.project_id = progress_history.project_id WHERE role = 'student' ",
+    (err, result) => {
+      res.send(result);
+    }
+  );
 });
 
 app.get("/userslogged", (req, res) => {
