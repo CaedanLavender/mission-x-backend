@@ -28,6 +28,7 @@ db.connect((err) => console.log(err || "Connection Successful"));
 
 // Project list endpoint
 app.get("/projects", (req, res) => {
+  console.log("Query to /projects");
   db.query("SELECT * FROM project", (err, results) => {
     if (results.length) {
       res.status(200).send(results);
@@ -39,6 +40,7 @@ app.get("/projects", (req, res) => {
 
 // Endpoint for a specific project
 app.get("/project", (req, res) => {
+  console.log("Query to /project");
   db.query(
     "SELECT * FROM project where project_id = ?",
     [req.query.project],
@@ -54,6 +56,7 @@ app.get("/project", (req, res) => {
 
 // Simple endpoint to return the number of rows in a given table
 app.get("/count", (req, res) => {
+  console.log("Query to /count looking for: " + req.query.table);
   db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
     if (err) {
       res
@@ -72,24 +75,20 @@ app.get("/count", (req, res) => {
 });
 
 app.get("/projectindex", (req, res) => {
+  console.log("Query to /projectindex looking for: " + req.query.project);
   db.query(
     `WITH project AS ( SELECT project_id, project_number, row_number() OVER ( ORDER BY project_number) AS 'rownumber' FROM project ) SELECT project_id, rownumber FROM project WHERE project_id = ?`,
     [req.query.project],
     (err, results) => {
-      console.log(results);
       res.send({ index: results[0].rownumber });
     }
   );
 });
 
-// Add your endpoints below
-// i.e:
-// app.get('/something', (req, res) => blah blah blah
-
 app.get("/users", (req, res) => {
+  console.log("Query to /users");
   db.query(
     "SELECT users.user_id, users.first_name, users.last_name, CONCAT(teachers.first_name, ' ', teachers.last_name) AS teacher_name, users.profile_pic, users.school, users.date_of_birth, users.contact_number, users.email, project.course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON progress_history.project_id = project.project_id JOIN users AS teachers ON users.teacher_id = teachers.user_id",
-
     (err, result) => {
       res.send(result);
     }
@@ -97,9 +96,9 @@ app.get("/users", (req, res) => {
 });
 
 app.get("/help-requests", (req, res) => {
+  console.log("Query to /help-requests");
   db.query(
     "SELECT first_name, profile_pic, date_created FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id",
-
     (err, result) => {
       res.send(result);
     }
