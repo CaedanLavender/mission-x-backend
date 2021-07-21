@@ -28,6 +28,7 @@ db.connect((err) => console.log(err || "Connection Successful"));
 
 // Project list endpoint
 app.get("/projects", (req, res) => {
+	console.log('Query to /projects');
 	db.query("SELECT * FROM project", (err, results) => {
 		if (results.length) {
 			res.status(200).send(results);
@@ -39,6 +40,7 @@ app.get("/projects", (req, res) => {
 
 // Endpoint for a specific project
 app.get("/project", (req, res) => {
+	console.log('Query to /project');
 	db.query(
 		"SELECT * FROM project where project_id = ?",
 		[req.query.project],
@@ -54,6 +56,7 @@ app.get("/project", (req, res) => {
 
 // Simple endpoint to return the number of rows in a given table
 app.get("/count", (req, res) => {
+	console.log('Query to /count looking for: ' + req.query.table);
 	db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
 		if (err) {
 			res.status(400)
@@ -71,21 +74,18 @@ app.get("/count", (req, res) => {
 });
 
 app.get("/projectindex", (req, res) => {
+	console.log('Query to /projectindex looking for: ' + req.query.project);
 	db.query(
 		`WITH project AS ( SELECT project_id, project_number, row_number() OVER ( ORDER BY project_number) AS 'rownumber' FROM project ) SELECT project_id, rownumber FROM project WHERE project_id = ?`,
 		[req.query.project],
 		(err, results) => {
-			console.log(results);
 			res.send({ index: results[0].rownumber });
 		}
 	);
 });
 
-// Add your endpoints below
-// i.e:
-// app.get('/something', (req, res) => blah blah blah
-
 app.get("/users", (req, res) => {
+	console.log('Query to /user');
 	db.query(
 		"SELECT first_name, last_name, school, date_of_birth, profile_pic, contact_number, email, course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON project.project_id = progress_history.project_id WHERE role = 'student' ",
 		(err, result) => {
@@ -95,6 +95,7 @@ app.get("/users", (req, res) => {
 });
 
 app.get("/userslogged", (req, res) => {
+	console.log('Query to /userslogged');
 	db.query("SELECT * FROM users", (err, result) => {
 		res.send(result);
 	});
