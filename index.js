@@ -107,3 +107,27 @@ app.get("/help-requests", (req, res) => {
 
 // The backend can now be queried at localhost:4000
 app.listen(4000);
+
+// container = {};
+// for(i = 0; i<10; i++) {
+// 	container['prop'+i] = {'a':'something'}
+// }
+
+// console.log(container)
+
+
+db.query(`
+SELECT users.user_id, users.first_name, users.last_name, progress_history.project_id, progress_history.date_started, progress_history.date_completed
+FROM progress_history
+RIGHT JOIN users
+ON progress_history.user_id = users.user_id
+WHERE users.role = 'student'
+ORDER BY users.user_id
+`, (err, results) => {
+	if (results.length) {
+		console.log(results);
+	} else {
+		console.log("There was an SQL error")
+		console.log(err)
+	}
+})
