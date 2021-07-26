@@ -108,18 +108,48 @@ app.get("/help-requests", (req, res) => {
 // The backend can now be queried at localhost:4000
 app.listen(4000);
 
+app.get("/progress", (req, res) => {
+	db.query(`
+		SELECT users.user_id, users.first_name, users.last_name, progress_history.project_id, progress_history.date_started, progress_history.date_completed
+		FROM progress_history
+		RIGHT JOIN users
+		ON progress_history.user_id = users.user_id
+		AND progress_history.date_completed IS NOT NULL
+		WHERE users.role = 'student'
+		ORDER BY users.user_id
+		`, (err, results) => {
+		if (results.length) {
+			let container = [];
+			results.forEach(row => {
+				// Sets up array>object structure
+				container[row.user_id - 1] = {
+					'name': row.first_name + " " + row.last_name,
+					'completedProjects': (container[row.user_id - 1]?.completedProjects.concat([row.project_id]) || [row.project_id])
+				}
+			})
+			console.log(container)
+			res.send(container)
+		} else {
+			console.log(err)
+			res.send(err)
+		}
+	})
+
+})
 
 db.query(`
 SELECT users.user_id, users.first_name, users.last_name, progress_history.project_id, progress_history.date_started, progress_history.date_completed
 FROM progress_history
 RIGHT JOIN users
 ON progress_history.user_id = users.user_id
+AND progress_history.date_completed IS NOT NULL
 WHERE users.role = 'student'
 ORDER BY users.user_id
 `, (err, results) => {
 	if (results.length) {
 		let container = [];
 		results.forEach(row => {
+			console.log(row.date_completed)
 			// Sets up array>object structure
 			container[row.user_id - 1] = {
 				'name': row.first_name + " " + row.last_name,
