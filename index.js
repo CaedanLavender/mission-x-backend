@@ -57,7 +57,7 @@ app.get("/project", (req, res) => {
 // Simple endpoint to return the number of rows in a given table
 app.get("/count", (req, res) => {
 	console.log("Query to /count looking for: " + req.query.table);
-	db.query(`SELECT COUNT(*) FROM ${req.query.table}`, (err, results) => {
+	db.query(`SELECT COUNT(*) AS count FROM ${req.query.table}`, (err, results) => {
 		if (err) {
 			console.log(err)
 			res
@@ -68,13 +68,17 @@ app.get("/count", (req, res) => {
 						: "Unknown error"
 				);
 		} else if (results?.length) {
-			res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
+			// res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
+			res.status(200).send(results[0]);
 		} else {
 			res.status(400).send("There was an error requesting the number of rows");
 		}
 	});
 });
 
+// endpoint to return the index of a project based on it's ID
+// You might think they're one and the same, but it may be that in the future, a new project called Project 01b is introduced, this project should come 2nd in the sequence, but will have an id of something else.
+// This endpoint and accompanying sql statement returns an assumed index based on it's position in a sort (this also assumes that the alphabetical position of each project's 'project_number' field will always corrospond to it's intended position -- here we depend on the naming convention being followed" "Project 01[nothing or a, b, c etc]")
 app.get("/projectindex", (req, res) => {
 	console.log("Query to /projectindex looking for: " + req.query.project);
 	db.query(
@@ -106,6 +110,8 @@ app.get("/help-requests", (req, res) => {
 	);
 });
 
+// endpoint to return progress as an array of objects.
+// takes the results of an SQL query, dynamically assembles array of objects and returns for the front-end to display
 app.get("/progress", (req, res) => {
 	db.query(`
 	SELECT users.user_id, users.first_name, users.last_name, progress_history.project_id, progress_history.date_started, progress_history.date_completed
@@ -121,8 +127,11 @@ app.get("/progress", (req, res) => {
 			results.forEach(row => {
 				// Sets up array>object structure
 				container[row.user_id - 1] = {
+					// properties are in quotes because they 'dont exist yet', these lines create the properties and sets them at the same time.
+					// Really, the name property gets overwritten each time the student of the same name appears in the sql results, but this is fine as their name doesn't change
 					'name': row.first_name + " " + row.last_name,
-					'completedProjects': (container[row.user_id - 1]?.completedProjects.concat([row.project_id]) || [row.project_id])
+					// This line uses a short-circuit statement to concatenate each completed project's project_id onto the array that may or may not already exist, the right side of the shortcircuit statement simply set's it to an array of a project_id because this would logically be the first item in the array if the property doesn't exist yet (hence the '?' after the container[index] earlier in the statment. An optional is used here as we don't know yet if the index is populated yet, and so if it fails, the right side of the || is executed)
+					'completedProjects': container[row.user_id - 1]?.completedProjects.concat([row.project_id]) || [row.project_id]
 				}
 			})
 			console.log(container)
