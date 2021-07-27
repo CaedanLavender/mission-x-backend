@@ -98,9 +98,24 @@ app.get("/users", (req, res) => {
 app.get("/help-requests", (req, res) => {
   console.log("Query to /help-requests");
   db.query(
-    "SELECT DISTINCT first_name, users.user_id, profile_pic, date_created FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id",
+    "SELECT DISTINCT first_name, users.user_id, profile_pic, date_created, done FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id",
     (err, result) => {
       res.send(result);
+    }
+  );
+});
+
+app.post("/help-requests-post", (req, res) => {
+  db.query(
+    "UPDATE mission_x.help_request SET done = ? WHERE user_id = ?",
+    [req.body.done, req.body.user_id],
+    function (err) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("Help requested saved as DONE/NOT DONE at the backend");
+        res.sendStatus(201);
+      }
     }
   );
 });
