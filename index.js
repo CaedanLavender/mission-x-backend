@@ -184,6 +184,22 @@ app.get("/progress", (req, res) => {
 	);
 });
 
+app.get("/user/project-submissions/", (req, res) => {
+	console.log("Request for project submissions with user: " + req.query.user_id + " on project: " + req.query.project_id)
+	db.query('SELECT * FROM progress_history WHERE user_id = ? AND project_id = ? ', [req.query.user_id, req.query.project_id], (err, results) => {
+		if (err) {
+			res.status(400).send("There was a problem")
+		} else {
+			console.log(results)
+			if (results.length) {
+				res.status(200).send({projectSubmitted: true})
+			} else {
+				res.status(200).send({projectSubmitted: false})
+			}
+		}
+	})
+})
+
 // Endpoint to send a file back based on the filename as a parameter
 // The frontend will hit this endpoint with the filename from the database as the param and then will get served the image back
 app.get("/project-submissions/images/:filename", (req, res) => {
