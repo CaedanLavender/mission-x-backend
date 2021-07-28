@@ -3,6 +3,8 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const mysql = require("mysql2");
+const multer = require("multer");
+const path = require("path");
 require("dotenv").config();
 
 // Declaring local variables with .env details
@@ -22,6 +24,23 @@ const db = mysql.createConnection({
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
+
+// Multer storage configuration
+const storage = multer.diskStorage({
+  destination: (req, file, callback) => {
+    // sets the destination directory to "Images"
+    callback(null, "Images/project-submissions");
+  },
+  filename: (req, file, callback) => {
+    // Names the file with the prefix 'project-submission' followed by the current datetime and the extension from the original filename (e.g. .png)
+    callback(
+      null,
+      "project-submission--" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // Logs if connection is successful
 db.connect((err) => console.log(err || "Connection Successful"));
@@ -108,26 +127,32 @@ app.get("/users", (req, res) => {
 app.get("/help-requests", (req, res) => {
   console.log("Query to /help-requests");
   db.query(
-    "SELECT DISTINCT first_name, users.user_id, profile_pic, date_created, done FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id",
+    "SELECT DISTINCT first_name, users.user_id, profile_pic, date_created, done FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id WHERE done=0",
     (err, result) => {
       res.send(result);
     }
   );
 });
 
+// help_requests table update
 app.post("/help-requests-post", (req, res) => {
-  db.query(
-    "UPDATE mission_x.help_request SET done = ? WHERE user_id = ?",
-    [req.body.done, req.body.userToSend],
-    function (err) {
-      if (err) {
-        console.log(err);
-      } else {
-        console.log("Help requested saved as DONE/NOT DONE at the backend");
+  const requests = req.body.completed_requests;
+
+  // {1: true, 2: false, 3: true}
+
+  Object.keys(requests).map((key) => {
+    db.query(
+      "UPDATE mission_x.help_request SET done = ? WHERE user_id = ?",
+      [requests[key], key],
+      function (err, result) {
+        console.log(result);
+        console.log(
+          "help_requests table successfully updated (sincerely, backend)"
+        );
         res.sendStatus(201);
       }
-    }
-  );
+    );
+  });
 });
 
 // endpoint to return progress as an array of objects.
@@ -166,6 +191,33 @@ app.get("/progress", (req, res) => {
       }
     }
   );
+});
+
+// Endpoint to send a file back based on the filename as a parameter
+// The frontend will hit this endpoint with the filename from the database as the param and then will get served the image back
+app.get("/project-submissions/images/:filename", (req, res) => {
+  const filePath =
+    path.resolve(__dirname) +
+    "/Images/project-submissions/" +
+    req.params.filename;
+  res.sendFile(filePath);
+});
+
+// Endpoint for uploading an image, runs the image into 'upload' as defined above (does multer stuff) the new filename can be accessed through res.req etc so an sql update can be made to add the submission to database
+app.post("/project-submissions/upload", upload.single("image"), (req, res) => {
+  console.log("Received image: " + res.req.file.filename);
+  console.log(req.body.user_id);
+  const dateTimeStamp = timeUTC();
+  db.query(
+    `
+	INSERT INTO progress_history (user_id, project_id, date_started, date_submitted, submissions)
+	values('${req.body.user_id}', '${req.body.project_id}', NOW(), NOW(), '${res.req.file.filename}')
+	`,
+    (err, results) => {
+      console.log(results || err);
+    }
+  );
+  res.status(200).send("The image was uploaded");
 });
 
 // The backend can now be queried at localhost:4000
