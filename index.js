@@ -39,29 +39,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// takes a number, adds zero to begining if it has only one digit returns a string
-const optionalZero = (int) => {
-	return (int < 10 && "0") + int + ""
-}
-
-// Generates a timestring formatted for the database based on the current UTC time
-const timeUTC = () => {
-	const currentTime = new Date()
-	return (
-		currentTime.getUTCFullYear() +
-		"-" +
-		optionalZero(currentTime.getUTCMonth()) +
-		"-" +
-		optionalZero(currentTime.getUTCDate()) +
-		" " +
-		optionalZero(currentTime.getUTCHours()) +
-		":" +
-		optionalZero(currentTime.getUTCMinutes()) +
-		":" +
-		optionalZero(currentTime.getUTCMinutes())
-	)
-}
-
 // Logs if connection is successful
 db.connect((err) => console.log(err || "Connection Successful"));
 
