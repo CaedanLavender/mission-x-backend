@@ -145,10 +145,10 @@ app.post("/help-requests-post", (req, res) => {
 				console.log(
 					"help_requests table successfully updated (sincerely, backend)"
 				);
-				res.sendStatus(201);
 			}
 		);
 	});
+	res.sendStatus(201); // moved your sendstatus to here. previously it was inside the .map function which meant that it got run twice if two help requests were marked as complete -- threw an error saying that the status can't be set twice - caused backend to crash
 });
 
 // endpoint to return progress as an array of objects.
