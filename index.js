@@ -118,7 +118,7 @@ app.get("/help-requests", (req, res) => {
 app.post("/help-requests-post", (req, res) => {
   db.query(
     "UPDATE mission_x.help_request SET done = ? WHERE user_id = ?",
-    [req.body.done, req.body.user_id],
+    [req.body.done, req.body.userToSend],
     function (err) {
       if (err) {
         console.log(err);
