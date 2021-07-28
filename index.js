@@ -219,7 +219,7 @@ app.post("/project-submissions/upload", upload.single("image"), (req, res) => {
 		INSERT INTO progress_history (user_id, project_id, date_started, date_submitted, submissions)
 		values('${req.body.user_id}', '${req.body.project_id}', NOW(), NOW(), '${res.req.file.filename}')
 		`,
-		(err, results) =>	console.log(results || err)
+		(err, results) => console.log(results || err)
 	);
 	res.status(200).send("The image was uploaded");
 });
