@@ -184,8 +184,15 @@ app.get("/progress", (req, res) => {
 	);
 });
 
+// Endpoint to send a file back based on the filename as a parameter
+// The frontend will hit this endpoint with the filename from the database as the param and then will get served the image back
+app.get("/project-submissions/images/:filename", (req, res) => {
+	const filePath = path.resolve(__dirname) + "/Images/project-submissions/" + req.params.filename
+	res.sendFile(filePath);
+})
+
 // Endpoint for uploading an image, runs the image into 'upload' as defined above (does multer stuff) the new filename can be accessed through res.req etc so an sql update can be made to add the submission to database
-app.post("/upload", upload.single("image"), (req, res) => {
+app.post("/project-submissions/upload", upload.single("image"), (req, res) => {
 	console.log("Received image: " + res.req.file.filename);
 	console.log(req.body.user_id)
 	const dateTimeStamp = timeUTC()
