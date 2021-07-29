@@ -118,7 +118,7 @@ app.get("/projectindex", (req, res) => {
 app.get("/users", (req, res) => {
   console.log("Query to /users");
   db.query(
-    "SELECT users.user_id, users.first_name, users.last_name, CONCAT(teachers.first_name, ' ', teachers.last_name) AS teacher_name, users.profile_pic, users.school, users.date_of_birth, users.contact_number, users.email, project.course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON progress_history.project_id = project.project_id JOIN users AS teachers ON users.teacher_id = teachers.user_id WHERE date_completed IS null",
+    "SELECT DISTINCT users.user_id, users.first_name, users.last_name, CONCAT(teachers.first_name, ' ', teachers.last_name) AS teacher_name, users.profile_pic, users.school, users.date_of_birth, users.contact_number, users.email, project.course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON progress_history.project_id = project.project_id JOIN users AS teachers ON users.teacher_id = teachers.user_id WHERE date_completed IS null",
     (err, result) => {
       res.send(result);
     }
@@ -129,7 +129,7 @@ app.get("/users", (req, res) => {
 app.get("/help-requests", (req, res) => {
   console.log("Query to /help-requests");
   db.query(
-    "SELECT DISTINCT first_name, users.user_id, profile_pic, date_created, done FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id WHERE done=0",
+    "SELECT first_name, users.user_id, profile_pic, date_created, done FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN help_request ON help_request.user_id  = users.user_id WHERE done=0",
     (err, result) => {
       res.send(result);
     }
