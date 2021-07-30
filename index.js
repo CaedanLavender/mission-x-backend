@@ -118,7 +118,7 @@ app.get("/projectindex", (req, res) => {
 app.get("/users", (req, res) => {
   console.log("Query to /users");
   db.query(
-    "SELECT DISTINCT users.user_id, users.first_name, users.last_name, CONCAT(teachers.first_name, ' ', teachers.last_name) AS teacher_name, users.profile_pic, users.school, users.date_of_birth, users.contact_number, users.email, project.course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON progress_history.project_id = project.project_id JOIN users AS teachers ON users.teacher_id = teachers.user_id WHERE date_completed IS null",
+    "SELECT DISTINCT users.user_id, users.first_name, users.last_name, CONCAT(teachers.first_name, ' ', teachers.last_name) AS teacher_name, users.profile_pic, users.school, users.date_of_birth, users.contact_number, users.email, project.course FROM users JOIN progress_history ON users.user_id = progress_history.user_id JOIN project ON progress_history.project_id = project.project_id JOIN users AS teachers ON users.teacher_id = teachers.user_id WHERE date_completed IS NULL AND users.role='student'",
     (err, result) => {
       res.send(result);
     }
