@@ -89,7 +89,6 @@ app.get("/count", (req, res) => {
               : "Unknown error"
           );
       } else if (results?.length) {
-        // res.status(200).send({ count: results[0][Object.keys(results[0])[0]] });
         res.status(200).send(results[0]);
       } else {
         res
